@@ -1,0 +1,21 @@
+<style>
+	.inline { color: red }
+	@layer foo {
+		.layer { color: purple }
+	}
+</style>
+
+<link rel="stylesheet" href="/linked.css">
+
+<script type="module">
+	import PullStyles from "/PullStyles.js"
+	customElements.define("pull-styles", PullStyles)
+</script>
+
+<my-component>
+	<template shadowrootmode="open">
+		<pull-styles adopt="all"></pull-styles>
+		<p class="inline">Inline</p>
+		<p class="linked">Linked</p>
+	</template>
+</my-component>
