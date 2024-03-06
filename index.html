@@ -1,3 +1,8 @@
+<script type="module">
+	import AdoptStyles from "/AdoptStyles.js"
+	customElements.define("adopt-styles", AdoptStyles)
+</script>
+
 <style>
 	.inline { color: red }
 	@layer foo {
@@ -7,14 +12,9 @@
 
 <link rel="stylesheet" href="/linked.css">
 
-<script type="module">
-	import PullStyles from "/PullStyles.js"
-	customElements.define("pull-styles", PullStyles)
-</script>
-
 <my-component>
 	<template shadowrootmode="open">
-		<pull-styles adopt="all"></pull-styles>
+		<adopt-styles adopt="all"></adopt-styles>
 		<p class="inline">Inline</p>
 		<p class="linked">Linked</p>
 	</template>
