@@ -9,3 +9,4 @@ into a Shadow-DOM.
 - [x] Import `<style>` tags
 - [x] Import into layer
 - [ ] Import from layer
+- [x] Automatic updating

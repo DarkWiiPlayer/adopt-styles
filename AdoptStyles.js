@@ -1,3 +1,35 @@
+class StylesEvent extends Event {
+	constructor() {
+		super("styles", { bubbles: true })
+	}
+}
+
+const styleSelector = `style, link[rel="stylesheet"]`
+
+/** @param {Element} node */
+const isStyleNode = node => node.matches(styleSelector) || node.querySelector(styleSelector)
+
+/** @param {MutationRecord} mutation */
+const isStyleMutation = mutation =>
+	(mutation.target instanceof Element) && isStyleNode(mutation.target)
+	|| (mutation.target instanceof Text) && isStyleNode(mutation.target.parentElement)
+	|| [...mutation.removedNodes].find(isStyleNode)
+
+const StylesObserver = new MutationObserver(mutations => {
+	[...mutations].forEach(console.log)
+	for (const {target} of [...mutations].filter(isStyleMutation)) {
+		target.dispatchEvent(new StylesEvent())
+	}
+})
+
+StylesObserver.observe(document.head, {
+	subtree: true,
+	characterData: true,
+	childList: true,
+	attributes: true,
+	attributeFilter: ["rel", "href"],
+})
+
 /**
 * @param {string} href
 * @param {string} layer
@@ -58,18 +90,18 @@ function collectStyles(sheet, target) {
 	}
 }
 
-export default class PullStyles extends HTMLElement {
+export default class AdoptStyles extends HTMLElement {
 	static observedAttributes = ["adopt", "layer"]
 
 	attributeChangedCallback() {
-		this.pullStyles()
+		this.adoptStyles()
 	}
 
 	/**
 	* @param {string} adopt What to adopt
 	* @param {string|undefined} layer What CSS layer to wrap the external styles in
 	*/
-	pullStyles(adopt=this.adopt, layer=this.layer) {
+	adoptStyles(adopt=this.adopt, layer=this.layer) {
 		if (adopt == "all") {
 			this.replaceChildren(document.createElement("style"))
 			const rules = new RuleCollection(layer)
@@ -86,4 +118,15 @@ export default class PullStyles extends HTMLElement {
 	get sheet() { return this.querySelector("style") }
 	get adopt() { return this.getAttribute("adopt") }
 	get layer() { return this.getAttribute("layer") }
+
+	connectedCallback() {
+		this.abortController = new AbortController()
+		document.addEventListener("styles", () => {
+			this.adoptStyles()
+		})
+	}
+
+	disconnectedCallback() {
+		this.abortController.abort()
+	}
 }
